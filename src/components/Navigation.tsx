@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Brain, Heart, MessageCircle, Users, Shield, AlertTriangle, Menu, X } from 'lucide-react';
+import { Brain, Heart, MessageCircle, Users, Shield, AlertTriangle, Menu, X, LogIn, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut, loading } = useAuth();
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Heart },
@@ -16,6 +18,10 @@ const Navigation = () => {
     { name: 'Consent Ledger', href: '/ledger', icon: Shield },
     { name: 'Emergency SOS', href: '/sos', icon: AlertTriangle },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <nav className="bg-card/80 backdrop-blur-md border-b border-border shadow-gentle">
@@ -54,6 +60,37 @@ const Navigation = () => {
                 </Link>
               );
             })}
+          </div>
+
+          {/* Auth Section - Desktop */}
+          <div className="hidden md:flex items-center space-x-4">
+            {loading ? (
+              <div className="w-8 h-8 rounded-full bg-primary/20 animate-pulse" />
+            ) : user ? (
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-primary/10">
+                  <User className="h-4 w-4 text-primary" />
+                  <span className="text-sm text-primary font-medium">
+                    {user.email?.split('@')[0]}
+                  </span>
+                </div>
+                <Button
+                  onClick={handleSignOut}
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary hover:bg-primary/10"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="border-primary/20">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -95,6 +132,37 @@ const Navigation = () => {
                 </Link>
               );
             })}
+            
+            {/* Auth Section - Mobile */}
+            <div className="pt-4 border-t border-border">
+              {loading ? (
+                <div className="w-8 h-8 rounded-full bg-primary/20 animate-pulse mx-auto" />
+              ) : user ? (
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-primary/10">
+                    <User className="h-4 w-4 text-primary" />
+                    <span className="text-sm text-primary font-medium">
+                      {user.email?.split('@')[0]}
+                    </span>
+                  </div>
+                  <Button
+                    onClick={handleSignOut}
+                    variant="ghost"
+                    className="w-full justify-start text-primary hover:bg-primary/10"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <Link to="/auth" onClick={() => setIsOpen(false)}>
+                  <Button variant="outline" className="w-full border-primary/20">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       )}
